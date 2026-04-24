@@ -1,6 +1,11 @@
 const express = require('express');
 
+const connectDB = require("./db");
+
+require("dotenv").config();
+
 const app = express();
+
 
 // Middleware example
 //Middles are to be positioned before the routes.
@@ -46,63 +51,22 @@ res.json(users);
 });
 
 //POST http method
-app.post('/api/users', (req,res) => {
-    const newUser = req.body;
-    console.log('Received user data:',newUser);
-    res.status(201).json({
-        message:'user created successfully',
-        user: newUser
-    })
-} )
-
-//todo API
-
-let todos = [];
-// GET/todos
-// return all todos
-app.get('/todos',(req,res) =>{
-res.status(200).json(todos);
-});
-
-//    POST/todos   
-//    Create a new todos
-//    Expected body:{id,tittle,completed}  
-app.post('/todos',(req,res)=>{
-    const{id, title,completed} = req.body;
-
-    //Validation
-    if(!id||!title||typeof completed !== 'boolean'){
-        return res.status(400).json({
-            error:'invalid input: id, title and completed are required'
-        });
+app.post('/todos',(req,res) =>{
+    const{id,title,completed} = req.body;
+    //Basic validation
+    if(id === undefined || !title || completed === undefined){
+        return res.status(400).json({error: 'id, title, and completed are required'})
     }
-//Check duplicate ID
-const existingTodo = todos.find(todo =>todo.id===id);
-if (existingTodo) {
-    return res.status(400).json({
-        error: 'Todo with this ID already exists'
-    });
-}
-
-
 const newTask = {
-    id:todos.length + 1,
+    id,
     title,
-    completed
+    completed: Boolean(completed),
 };
-
-todos.push(newTask);
-
-//Return the created task
-res.status(201).json(newTask)
 res.status(201).json(newTask);
 });
 
 
-
-
-
-const PORT = 3000;
+const PORT = process.env.PORT
 
 app.listen(PORT, () => {
     console.log(`server is running at http://localhost:${PORT}`);
